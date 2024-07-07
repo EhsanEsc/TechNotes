@@ -1,0 +1,553 @@
+1.Avoiding typo: type it first time you use it, if it is hard, that is a bad name
+2.Good naming: 
+    2.1 limit use of abbreviations
+    2.2 Don’t try to optimize for the minimum number of characters
+    2.3 Bloated name when info already expressed by their parameter types
+    2.4 A good name expresses what code is doing, not how it is doing it.
+3.Strong Type (https://github.com/joboccara/NamedType)
+
+template <typename T, typename Parameter>
+class NamedType
+{
+public:
+    explicit NamedType(T const& value) : value_(value) {}
+    explicit NamedType(T&& value) : value_(std::move(value)) {}
+    T& get() { return value_; }
+    T const& get() const {return value_; }
+private:
+    T value_;
+};
+
+using Meter = NamedType<double, struct MeterParameter>;
+using Width = NamedType<Meter, struct WidthParameter>;
+using Height = NamedType<Meter, struct HeightParameter>;
+
+Meter operator"" _meter(unsigned long long length) { return Meter(length); }
+// Usage
+Rectangle r(Width(10_meter), Height(12_meter));
+
+4.Respecting levels of abstraction
+    To know HOW something works, we should go one next lower one
+    A given level of abstraction is characterized by WHAT is done in it. 
+
+.Lambda Usage
+    use anonymous lambdas defined at their call site for functions that are transparent for the level of abstraction
+    otherwise, encapsulate your lambda in an intermediary function.
+
+4.What to comment
+    Imagine what you would need to tell to someone who is reading your code, 
+        if you were sitting next to them. This is what you put in comments.
+    If you have to comment for understanding the code, it is sign of bac code
+        write that piece of code differently to make more expressive
+    comments should express what the code intends to do, rather than how it implements it.
+
+5.Buggy code in compact code
+     In C++, the order of evaluation of a function’s arguments is unspecified
+     calling &&, || or , on two booleans always evaluates the left hand side first, and (if necessary) the right hand side afterwards.
+     in C++17, more rules added for order of executation. for example a[i] = i++; undefined before 17
+        it is only in C++17 that the evaluation of the right hand side of an assignement is required to occur before the one of the left hand side.
+
+6. Express metaprogramming
+// Base
+template<typename...>
+using try_to_instantiate = void;
+
+using disregard_this = void;
+
+template<template<typename...> class Expression, typename Attempt, typename... Ts>
+struct is_detected_impl : std::false_type{};
+
+template<template<typename...> class Expression, typename... Ts>
+struct is_detected_impl<Expression, try_to_instantiate<Expression<Ts...>>, Ts...> : std::true_type{};
+
+template<template<typename...> class Expression, typename... Ts>
+constexpr bool is_detected = is_detected_impl<Expression, disregard_this, Ts...>::value;    
+
+// Usage
+template<typename T, typename U>
+using assign_expression = decltype(std::declval<T&>() = std::declval<U&>());
+
+template<typename T, typename U>
+constexpr bool is_assignable = is_detected<assign_expression, T, U>;
+
+// Generated Values
+
+// compile-time usage
+static_assert(is_assignable<int, double>, "");
+static_assert(!is_assignable<int, std::string>, "");
+
+// run-time usage
+std::cout << std::boolalpha;
+std::cout << is_assignable<int, double> << '\n';
+std::cout << is_assignable<int, std::string> << '\n';
+
+7.toString for all types
+
+// Templates
+// 1- detecting if std::to_string is valid on T
+
+template<typename T>
+using std_to_string_expression = decltype(std::to_string(std::declval<T>()));
+
+template<typename T>
+constexpr bool has_std_to_string = is_detected<std_to_string_expression, T>;
+
+
+// 2- detecting if to_string is valid on T
+
+template<typename T>
+using to_string_expression = decltype(to_string(std::declval<T>()));
+
+template<typename T>
+constexpr bool has_to_string = is_detected<to_string_expression, T>;
+
+
+// 3- detecting if T can be sent to an ostringstream
+
+template<typename T>
+using ostringstream_expression = decltype(std::declval<std::ostringstream&>() << std::declval<T>());
+
+template<typename T>
+constexpr bool has_ostringstream = is_detected<ostringstream_expression, T>;
+
+// functions
+// 1-  std::to_string is valid on T
+template<typename T, typename std::enable_if<has_std_to_string<T>, int>::type = 0>
+std::string toString(T const& t)
+{
+    return std::to_string(t);
+}
+
+// 2-  std::to_string is not valid on T, but to_string is
+template<typename T, typename std::enable_if<!has_std_to_string<T> && has_to_string<T>, int>::type = 0>
+std::string toString(T const& t)
+{
+    return to_string(t);
+}
+
+// 3-  neither std::string nor to_string work on T, let's stream it then
+template<typename T, typename std::enable_if<!has_std_to_string<T> && !has_to_string<T> && has_ostringstream<T>, int>::type = 0>
+std::string toString(T const& t)
+{
+    std::ostringstream oss;
+    oss << t;
+    return oss.str();
+}
+
+8. difference between struct and class
+
+only language difference: public by default for sturct, private for class. such as defining members and inheritence from other
+
+convention difference:
+    struct is a bundle, some related items together in some context
+    class can do things and have responsibility
+use class if it has at least one private member and there is an implementation hidden by interface.
+
+9. Interface principle
+non-member funcitons vs member function
+circle.getPerimeter() vs getPerimeter(circle)
+Argument Dependent Lookup works with getRaduis without namespace prefix(it checks namespace of first argument as well as global namespace)
+pros: more flexible, maybe use with different classes(generic code)
+cons: hard to discover, "least surprise" getRaduis is method and getPerimeter is free function, 
+    design problem(maybe handle better generic code with interface and inheritence)
+
+A uniform function call syntax -> std::invoke(f, x, x1, ..., xn); // standard in c++17
+    calls f(x, x1, ..., xn) if f is not a class method,
+    calls x.f(x1, ..., xn) if f is a class method.
+
+10. nested switch cases 
+// can replace by This
+
+// enums should end with something
+enum class Color {Red, Blue, End_};
+enum class Size {Small, Medium, Large, End_};
+
+template<typename Enum>
+constexpr size_t enumValue(Enum e)
+{
+    return static_cast<size_t>(e);
+}
+
+template<typename Enum>
+constexpr size_t enumSize()
+{
+    return enumValue(Enum::End_);
+}
+
+template<typename Enum1, typename Enum2>
+struct CombineEnums
+{
+    constexpr size_t operator()(Enum1 e1, Enum2 e2)
+    {
+        return enumValue(e1) * enumSize<Enum2>() + enumValue(e2);
+    }
+};
+// usage 
+CombineEnums<Color, Size> combineEnums;
+switch (combineEnums(color, size))
+{
+    case combineEnums(Color::Red, Size::Small):
+    {
+        ....
+    }
+    ...
+}
+
+11. Isolate toxic api with adaptor pattern
+encapsulate interaction with ugly api by new class
+
+class NicePhysicalSimulator
+{
+public:
+    /* methods you would expect
+       in a physical simulator */
+
+protected:
+    NicePhysicalSimulator(/* inputs you would
+    logically feed to a physical simulator */);
+    ~NicePhysicalSimulator(); // see comments further below
+
+private:
+    UglyPhysicalSimulator uglyPhysicalSimulator_;
+};
+
+12. Multiple error handling with the optional monad in C++
+# first way: return bool as return type (C method)
+success &= f1(3, b1);
+success &= f1(4, b2);
+success &= f2(b1, b2, c);
+if(success) {} else {}
+
+# second way: Exception(exception safety stuff + Performance issues)
+
+# third way: Optional(a lot of ifs)
+boost::optional<int> b = f(3);
+if (b)
+{
+    boost::optional<int> c = f(4);
+    if (c)
+    {
+        boost::optional<int> d = g(*b, *c);
+        if (d)
+        {...}
+    }   
+}
+
+# forth way: using monad (combine an optional<T> with a function taking an T and returning and optional<U>)
+# make it operator for better syntax(using operator>>=)
+# compatible with any callable type (functions, function pointers, std::function, lambdas or other function objects)()
+
+template<typename T, typename TtoOptionalU>
+auto operator>>=(boost::optional<T> const& t, TtoOptionalU f) -> decltype(f(*t))
+{
+    if (t) { return f(*t); }
+    else { return boost::none; }
+}
+
+boost::optional<int> result3 = f(3) >>= [=](int b) { return
+                               f(4) >>= [=](int c) { return
+                               g2(b, c) >>= [=](int d) { return
+                               h(d) >>= [=](int e) { return
+                               h(e);
+                      };};};};
+
+# fifth method: better monad with simpler usage for client
+// Functions with arguments that could fail
+int f1(int a);
+int f2(int b, int c);
+int f3(int d);
+int f4(int e);
+
+template <typename R, typename ... P>
+auto make_failable(R (*f)(P ... ps))
+{
+    return [f](std::optional<P> ... xs) -> std::optional<R>
+    {
+        if ((xs && ...)) {
+            return {f(*(xs)...)};
+        } else {
+            return {};
+        }
+    };
+}
+
+auto failable_f1 = make_failable(f1);
+auto failable_f2 = make_failable(f2);
+auto failable_f3 = make_failable(f3);
+auto failable_f4 = make_failable(f4);
+
+failable_f4( failable_f4( failable_f3( failable_f2( failable_f1(x), failable_f1(y) ) ) ) )
+
+// if Functions that could themselves fail
+int f1(int a);
+int f2(int b, int c);
+std::optional<int> f3(int d);
+int f4(int e);
+
+template <typename R, typename ... P>
+auto make_failable(std::optional<R> (*f)(P ... ps))
+{
+    return [f](std::optional<P> ... xs) -> std::optional<R>
+    {
+        if ((xs && ...)) {
+            return f(*(xs)...);
+        } else {
+            return {};
+        }
+    };
+}
+
+// usage like top
+
+13. if statements should be as close as possible to their specification.
+
+14. NAMED Function return type 
+exception has performance issues and exception safety code
+non-const refrence is input-output not output
+optional cant be used with void
+# 1. Strong Type
+using HasSucceeded = NamedType<bool, struct HasSucceededTag>;
+HasSucceeded save(PieceOfData const& preciousData);
+{
+    // attempt to save...
+    // if it failed
+    return HasSucceeded(false);
+    // else, if all goes well
+    return HasSucceeded(true);
+}
+HasSucceeded hasSucceeded = save(myData); // or auto hasSucceeded = ...
+if(!hasSucceeded.get()){}
+
+using NumberOfEntriesRemoved = NamedType<int, struct NumberOfEntriesRemovedTag>;
+
+# 2. Weak Type
+using HasSucceeded = bool;
+HasSucceeded save(PieceOfData const& preciousData);
+
+
+void setPosition(Row row, Column column);
+
+// Call site:
+setPosition(Row(36), Column(42));
+
+15. multiple return Values
+# 1. return struct
+
+struct Outputs
+{
+    Output output1;
+    Output output2;
+
+    Outputs(Output const& output1, Output const& output2) : output1(output1), output2(output2){}
+};
+
+Outputs f(Input const& input)
+{
+    // C++03
+    return Outputs(output1, output2);
+    // C++11
+    return {output1, output2};
+}
+
+auto outputs = f(input);
+auto output1 = outputs.output1;
+auto output2 = outputs.output2;
+
+# 2. tuple
+std::tuple<Output, Output> f(Input const& input){ return {output1, output2}; }
+
+auto output = f(input); auto output1 = std::get<0>(output); auto output2 = std::get<1>(output);
+
+Output output1; Output output2; std::tie(output1, output2) = f(input);
+
+//C++17
+auto [output1, output2] = f(input);
+
+# 3. Strong types
+std::tuple<Output1, Output2> f(Input const& input) { return {Output1(output1), Output2(output2)}; }
+
+auto outputs = f(input);
+auto output1 = std::get<Output1>(outputs);
+auto output2 = std::get<Output2>(outputs);
+
+16. Debug info
+f(tee(myValue));
+// C++14
+template <typename T>
+decltype(auto) tee(T&& value)
+{
+    std::cout << value << "\n";
+    return std::forward<T>(value);
+}
+// C++11
+template<typename T>
+auto tee(T&& value) -> decltype(std::forward<T>(value))
+{...}
+
+// Custom tee
+template <typename Print>
+class Tee
+{
+public:
+    explicit Tee(Print print) : print_(print){}
+    template <class T>
+    decltype(auto) operator()(T&& value)
+    {
+        print_(value);
+        return std::forward<T>(value);
+    }
+private:
+    Print print_;
+};
+
+template <typename Print>
+Tee<Print> make_tee(Print print)
+{
+    return Tee<Print>(print);
+}
+auto myTee = make_tee([](auto const& value){ /* custom print... */ });
+
+17. Function aliases (Use alternative function instead of main one)
+int newId(){return newIdFromDatabase();} // C++03
+const auto newId = newIdFromDatabase; // C++11 (long-lived function pointers can be a target for security exploits.)
+
+18. String formatting
+# std
+std::ostringstream table;
+table << std::setw(10) << std::left << "First" << '|' << std::setw(10) << std::right << 250 << '\n'
+      << std::setw(10) << std::left << "Second" << '|' << std::setw(10) << std::right << 3 << '\n'
+      << std::setw(10) << std::left << "Third" << '|' << std::setw(10) << std::right << 40286 << '\n';
+/*
+First     |       250
+Second    |         3
+Third     |     40286
+*/
+
+# #include <boost/format.hpp> like printf but
+## 1. more safety
+## 2. more feature
+std::ostringstream result;
+result << boost::format("%1% %2% %1%") % '-' % "___";
+// -___-
+## 3. more flexibility
+std::ostringstream result;
+result << boost::format("Draw at %1%.") % Point(3,4);
+// Draw at {3-4}. // Point has << operator
+
+# using boost::spirit::karma
+std::vector<int> numbers = {5, 3, 2};
+std::string result;
+
+generate(
+    std::back_inserter(result), // the output
+    int_ << *(", " << int_),    // the generator
+    numbers                     // the input
+);
+// "5, 3, 2"
+int_: print the first element (if there is one) with the format of an integer,
+<<: “and then”: combine with another generator that will take care of the rest of the elements,
+*: repeat the following as many times as possible. It looks like the * in regex except the C++ syntax forces this to be at the beginning since this is implemented as an overload of unary operator*,
+", ": print this string,
+<<: “and then”
+int_ print the next element as an integer.
+
+std::complex<double> c(3, -1);
+std::string result;
+
+generate(
+    std::back_inserter(result),      // the output
+    !double_(0.0) << '(' << double_ << ',' << double_ << ')' //
+    |                                                        // the generator
+    omit[double_] << double_,                                //
+    c.imag(), c.real(), c.imag()     // the input
+);
+!double(0.0): if the first input parameter (c.imag()) is equal to zero, this part of the generator “fails”. This mean that the rest of the generator until the next part (starting after the pipe (|) character) is ignored. A new trial will be done with the next part of the generator,
+<< ‘(‘ << double_ << ‘,’ << double_ << ‘)’: and then print the complex number is the expected format, with the second (c.real()) and third (c.imag()) argument of the input,
+|: if the previous generator succeeded then ignore the following, otherwise try the following,
+omit[double_]: disregards the first input argument (c.imag()),
+<< double_: and then print the second input argument (c.real()).
+With the above code, results contains (3.0,-1.0).
+
+19. RAII usage
+
+class Persistor
+{
+public:
+    explicit Persistor(Data const& data);
+    ~Persistor()
+    {
+      // open database connection
+      // save data_ in database
+      // close database connection 
+    }
+private:
+    Data data_;
+};
+# Use or not?
+# 1.is there code we want to be called no matter how a function ends, be there normal ending, early return or uncaught exceptions (which is the case for releasing a resource and popping off the logger)?
+# 2.does it help respect levels of abstraction?
+
+20. Choosing right name
+respecting levels of abstraction. What do we mean by levels of abstraction? It shows easily in a call stack. So in a call stack, you’ve got functions that call each other, and at a given level of the call stack you’ve got the name of the function that says WHAT it does.
+
+To get to a lower abstraction level it’s something that’s called by that function. And to get to that lower level, you answer the question “HOW is it implemented”. Conversely, to get to a higher level of abstraction, the question to ask is: “IN WHAT CONTEXT is my thing used”.\
+
+which is “What does it represent?”, this thing does not represent an iterator. It’s implemented as an iterator, but we don’t care about that when reading the code
+Name should fits in its context.
+
+21. Guard
+If statement for special cases handle at the beginning of the function. better than using if else for each condition
+Don't sacrifise Symmetry for removing nested ifs. use if else for different methods of funciton.
+double applyDiscount(double price) {
+    if (reductionType_ == Percentage) {
+        return price * (1 - reductionValue_); }
+    else{
+        return price - reductionValue_; }}
+# instead of 
+double applyDiscount(double price) {
+    if (reductionType_ == Percentage) {
+        return price * (1 - reductionValue_); }
+    return price - reductionValue_; }
+
+22. Unit tests
+“These unit tests are a good form of documentation. They show exactly how the code is intended to be used.”
+
+23. Singlation Anti-pattern
+# 1. no standard implementation
+# 2. no way of controlling construction and destruction of it.
+# 3. impossible to unit-test
+# 4. global variable
+# 5. Thread safety in multithreding programs
+# Easy to add a new functionality to system
+# no scalability
+# Solution: not use them at all. doable with amazing results
+## Design systems, their lifetime, ownership and how they interact with each other
+# problem the the objects are too tightly coupled
+# What this will do is make the systems decoupled. Some other system that sits above and knows  
+#    the two will connect them and take care of lifetimes.  
+# This alone has huge benefits in terms of code readability, compilation time, writing tests and so on.
+class Profiler
+{
+public:
+    Profiler::Profiler()
+    void Update()
+    {
+        sig_Update.emit()
+        sig_Log.emit("Profiler updating")
+    }
+
+    Signal<void> sig_Update;
+    Signal<void(std::string)> sig_Log;
+};
+# As for the implementation, a signal is simply a list of functions to be called when you call an emit method. 
+# A nice thing to have here is when you connect a signal to a certain object and method to receive a connection object. 
+# If the connection object is destroyed then the signal is automatically disconnected from your object.
+https://github.com/pbhogan/Signals
+
+23. return value optimization
+the RVO (Return Value Optimization),
+the NRVO (Named Return Value Optimization)
+T t = f();
+T f() { ....
+    return T(constructor arguments);}
+# remove copies from temp object to result object.

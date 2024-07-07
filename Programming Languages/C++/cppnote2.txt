@@ -1,0 +1,183 @@
+// Internal global variables definitions:
+static int g_x;          // defines non-initialized internal global variable (zero initialized by default)
+static int g_x{ 1 };     // defines initialized internal global variable
+
+const int g_y { 2 };     // defines initialized internal global const variable
+constexpr int g_y { 3 }; // defines initialized internal global constexpr variable
+
+// Internal function definitions:
+static int foo() {};     // defines internal function
+
+// External global variable definitions:
+int g_x;                       // defines non-initialized external global variable (zero initialized by default)
+extern const int g_x{ 1 };     // defines initialized const external global variable
+extern constexpr int g_x{ 2 }; // defines initialized constexpr external global variable
+
+// Forward declarations
+extern int g_y;                // forward declaration for non-constant global variable
+extern const int g_y;          // forward declaration for const global variable
+extern constexpr int g_y;      // not allowed: constexpr variables can't be forward declared
+
+The rule of three is a well known C++ principle that states that if a class requires a user-defined destructor, copy constructor, or copy assignment operator, then it probably requires all three. 
+
+The rule of zero states, “Classes that have custom destructors, copy/move constructors or copy/move assignment operators should deal exclusively with ownership of dynamic memory or resources. Other classes should not have custom destructors, copy/move constructors or copy/move assignment operators.” 
+
+std::vector<int> array(5); // Calls std::vector::vector(std::vector::size_type), 5 value-initialized elements: 0 0 0 0 0
+std::vector<int> array{ 5 }; // Calls std::vector::vector(std::initializer_list<int>), 1 element: 5
+
+If your base class has virtual functions, your destructor should also be virtual, otherwise undefined behavior will result in certain cases
+    
+  3 rules of access in each kind of inheritance
+    A class can always access its own (non-inherited) members.
+    The public accesses the members of a class based on the access specifiers of the class it is accessing.
+    A derived class accesses inherited members based on the access specifier inherited from the parent class. This varies depending on the access specifier and type of inheritance used.
+
+Whenever you are dealing with inheritance, you should make any explicit destructors virtual.
+Note that if you want your base class to have a virtual destructor that is otherwise empty, you can define your destructor this way:
+  virtual ~Base() = default;
+
+  Never call virtual functions from constructors or destructors.
+
+Use the virtual keyword on virtual functions in a base class.
+
+Use the override specifier (but not the virtual keyword) on override functions in derived classes. This includes virtual destructors.
+
+Binding refers to the process that is used to convert identifiers (such as variable and function names) into addresses
+Early binding: Most of the function calls the compiler encounters will be direct function calls. A direct function call is a statement that directly calls a function.
+In some programs, the function being called can’t be resolved until runtime. In C++, this is sometimes known as late binding (or in the case of virtual function resolution, dynamic binding).
+In C++, one way to get late binding is to use function pointers.
+To implement virtual functions, C++ implementations typically use a form of late binding known as the virtual table. The virtual table is a lookup table of functions used to resolve function calls in a dynamic/late binding manner.
+
+Using a pure virtual function has two main consequences: First, any class with one or more pure virtual functions becomes an abstract base class, which means that it can not be instantiated!
+Second, any derived class must define a body for this function, or that derived class will be considered an abstract base class as well.
+
+An interface class is a class that has no member variables, and where all of the functions are pure virtual! In other words, the class is purely a definition, and has no actual implementation. Interfaces are useful when you want to define the functionality that derived classes must implement, but leave the details of how the derived class implements that functionality entirely up to the derived class.
+
+To share a base class, simply insert the “virtual” keyword in the inheritance list of the derived class. This creates what is called a virtual base class, which means there is only one base object. The base object is shared between all objects in the inheritance tree and it is only constructed once.
+### Example
+#include <iostream>
+
+class PoweredDevice
+{
+public:
+    PoweredDevice(int power)
+    {
+		std::cout << "PoweredDevice: " << power << '\n';
+    }
+};
+
+class Scanner: virtual public PoweredDevice // note: PoweredDevice is now a virtual base class
+{
+public:
+    Scanner(int scanner, int power)
+        : PoweredDevice{ power } // this line is required to create Scanner objects, but ignored in this case
+    {
+		std::cout << "Scanner: " << scanner << '\n';
+    }
+};
+
+class Printer: virtual public PoweredDevice // note: PoweredDevice is now a virtual base class
+{
+public:
+    Printer(int printer, int power)
+        : PoweredDevice{ power } // this line is required to create Printer objects, but ignored in this case
+    {
+		std::cout << "Printer: " << printer << '\n';
+    }
+};
+
+class Copier: public Scanner, public Printer
+{
+public:
+    Copier(int scanner, int printer, int power)
+        : PoweredDevice{ power }, // PoweredDevice is constructed here (Copier is responsible for constructing PoweredDevice)
+        Scanner{ scanner, power }, Printer{ printer, power }
+    {
+    }
+};
+###
+
+the assigning of a Derived class object to a Base class object is called object slicing (or slicing for short).
+### Example to avoid slicing (All of them calls "Derived" version)
+int main()
+{
+    Derived derived{ 5 };
+    std::cout << "derived is a " << derived.getName() << " and has value " << derived.getValue() << '\n';
+
+    Base& ref{ derived };
+    std::cout << "ref is a " << ref.getName() << " and has value " << ref.getValue() << '\n';
+
+    Base* ptr{ &derived };
+    std::cout << "ptr is a " << ptr->getName() << " and has value " << ptr->getValue() << '\n';
+
+    return 0;
+}
+###
+### Example for slicing vector Method1: Use Base*
+#include <iostream>
+#include <vector>
+
+int main()
+{
+	std::vector<Base*> v{};
+
+	Base b{ 5 }; // b and d can't be anonymous objects
+	Derived d{ 6 };
+
+	v.push_back(&b); // add a Base object to our vector
+	v.push_back(&d); // add a Derived object to our vector
+
+	// Print out all of the elements in our vector
+	for (const auto* element : v)
+		std::cout << "I am a " << element->getName() << " with value " << element->getValue() << '\n';
+
+	return 0;
+}
+### Method2: Use refrence_wrapper
+
+int main()
+{
+	std::vector<std::reference_wrapper<Base>> v{}; // a vector of reassignable references to Base
+
+	Base b{ 5 }; // b and d can't be anonymous objects
+	Derived d{ 6 };
+
+	v.push_back(b); // add a Base object to our vector
+	v.push_back(d); // add a Derived object to our vector
+
+	// Print out all of the elements in our vector
+	// we use .get() to get our element out of the std::reference_wrapper
+	for (const auto& element : v) // element has type const std::reference_wrapper<Base>&
+		std::cout << "I am a " << element.get().getName() << " with value " << element.get().getValue() << '\n';
+
+	return 0;
+}
+###
+
+you convert a Derived pointer into a Base pointer (in fact, getObject() does just that). This process is sometimes called upcasting.
+dynamic_cast can be used for dynamic casting is for converting base-class pointers into derived-class pointers. This process is called downcasting.
+
+Always ensure your dynamic casts actually succeeded by checking for a null pointer result.
+###
+int main()
+{
+	Base* b{ getObject(true) };
+
+	Derived* d{ dynamic_cast<Derived*>(b) }; // use dynamic cast to convert Base pointer into Derived pointer
+
+	if (d) // make sure d is non-null
+		std::cout << "The name of the Derived is: " << d->getName() << '\n';
+
+	delete b;
+
+	return 0;
+}
+###
+
+It turns out that downcasting can also be done with static_cast. The main difference is that static_cast does no runtime type checking to ensure that what you’re doing makes sense. This makes using static_cast faster, but more dangerous.
+
+Run-time type information (RTTI) is a feature of C++ that exposes information about an object’s data type at runtime. This capability is leveraged by dynamic_cast. Because RTTI has a pretty significant space performance cost, some compilers allow you to turn RTTI off as an optimization. Needless to say, if you do this, dynamic_cast won’t function correctly.
+
+only member functions can be virtualized. 
+
+https://www.learncpp.com/cpp-tutorial/partial-template-specialization/

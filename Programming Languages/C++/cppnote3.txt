@@ -1,0 +1,82 @@
+1.Avoiding typo: type it first time you use it, if it is hard, that is a bad name
+2.Good naming: 
+    2.1 limit use of abbreviations
+    2.2 Don’t try to optimize for the minimum number of characters
+    2.3 Bloated name when info already expressed by their parameter types
+    2.4 A good name expresses what code is doing, not how it is doing it.
+3.Strong Type
+
+template <typename T, typename Parameter>
+class NamedType
+{
+public:
+    explicit NamedType(T const& value) : value_(value) {}
+    explicit NamedType(T&& value) : value_(std::move(value)) {}
+    T& get() { return value_; }
+    T const& get() const {return value_; }
+private:
+    T value_;
+};
+
+using Meter = NamedType<double, struct MeterParameter>;
+using Width = NamedType<Meter, struct WidthParameter>;
+using Height = NamedType<Meter, struct HeightParameter>;
+
+Meter operator"" _meter(unsigned long long length) { return Meter(length); }
+// Usage
+Rectangle r(Width(10_meter), Height(12_meter));
+
+4.Respecting levels of abstraction
+    To know HOW something works, we should go one next lower one
+    A given level of abstraction is characterized by WHAT is done in it. 
+
+.Lambda Usage
+    use anonymous lambdas defined at their call site for functions that are transparent for the level of abstraction
+    otherwise, encapsulate your lambda in an intermediary function.
+
+4.What to comment
+    Imagine what you would need to tell to someone who is reading your code, 
+        if you were sitting next to them. This is what you put in comments.
+    If you have to comment for understanding the code, it is sign of bac code
+        write that piece of code differently to make more expressive
+    comments should express what the code intends to do, rather than how it implements it.
+
+5.Buggy code in compact code
+     In C++, the order of evaluation of a function’s arguments is unspecified
+     calling &&, || or , on two booleans always evaluates the left hand side first, and (if necessary) the right hand side afterwards.
+     in C++17, more rules added for order of executation. for example a[i] = i++; undefined before 17
+        it is only in C++17 that the evaluation of the right hand side of an assignement is required to occur before the one of the left hand side.
+
+6. Express metaprogramming
+// Base
+template<typename...>
+using try_to_instantiate = void;
+
+using disregard_this = void;
+
+template<template<typename...> class Expression, typename Attempt, typename... Ts>
+struct is_detected_impl : std::false_type{};
+
+template<template<typename...> class Expression, typename... Ts>
+struct is_detected_impl<Expression, try_to_instantiate<Expression<Ts...>>, Ts...> : std::true_type{};
+
+template<template<typename...> class Expression, typename... Ts>
+constexpr bool is_detected = is_detected_impl<Expression, disregard_this, Ts...>::value;    
+
+// Usage
+template<typename T, typename U>
+using assign_expression = decltype(std::declval<T&>() = std::declval<U&>());
+
+template<typename T, typename U>
+constexpr bool is_assignable = is_detected<assign_expression, T, U>;
+
+// Generated Values
+
+// compile-time usage
+static_assert(is_assignable<int, double>, "");
+static_assert(!is_assignable<int, std::string>, "");
+
+// run-time usage
+std::cout << std::boolalpha;
+std::cout << is_assignable<int, double> << '\n';
+std::cout << is_assignable<int, std::string> << '\n';
