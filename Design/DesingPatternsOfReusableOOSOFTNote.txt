@@ -1,0 +1,232 @@
+Creational class patterns defer some part of object creation to subclasses, while Cre-
+ational object patterns defer it to another object. The Structural class patterns use
+inheritance to compose classes, while the Structural object patterns describe ways to
+assemble objects. The Behavioral class patterns use inheritance to describe algorithms
+and flow of control, whereas the Behavioral object patterns describe how a group of
+objects cooperate to perform a task that no single object can carry out alone.
+
+Programming to an Interface, not an Implementation
+
+There are two benefits to manipulating objects solely in terms of the interface defined
+by abstract classes:
+1. Clients remain unaware of the specific types of objects they use, as long as the
+objects adhere to the interface that clients expect.
+2. Clients remain unaware of the classes that implement these objects. Clients only
+know about the abstract class(es) defining the interface.
+
+Favor object composition over class inheritance.
+
+Acquaintance implies that an object merely knows of another object. Sometimes ac-
+quaintance is called "association" or the "using" relationship.
+
+Generally we speak of an object
+having or being part of another object. Aggregation implies that an aggregate object and
+its owner have identical lifetimes.
+
+Here are some common causes of redesign along with the design pattern(s) that address
+them:
+1. Creating an object by specifying a class explicitly. Specifying a class name when
+you create an object commits you to a particular implementation instead of a
+particular interface. This commitment can complicate future changes. To avoid it,
+create objects indirectly.
+Design patterns: Abstract Factory (87), Factory Method (107), Prototype (117).
+2. Dependence on specific operations. When you specify a particular operation, you
+commit to one way of satisfying a request. By avoiding hard-coded requests, you
+make it easier to change the way a request gets satisfied both at compile-time and
+at run-time.
+Design patterns: Chain of Responsibility (223), Command (233).
+3. Dependence on hardware and software platform. External operating system interfaces
+and application programming interfaces (APIs) are different on different hard-
+ware and software platforms. Software that depends on a particular platform will
+be harder to port to other platforms. It may even be difficult to keep it up to date
+on its native platform. It's important therefore to design your system to limit its
+platform dependencies.
+Design patterns: Abstract Factory (87), Bridge (151).
+4. Dependence on object representations or implementations. Clients that know how an
+object is represented, stored, located, or implemented might need to be changed
+when the object changes. Hiding this information from clients keeps changes
+from cascading.
+Design patterns: Abstract Factory (87), Bridge (151), Memento (283), Proxy (207).
+5. Algorithmic dependencies. Algorithms are often extended, optimized, and replaced
+during development and reuse. Objects that depend on an algorithm will have
+to change when the algorithm changes. Therefore algorithms that are likely to
+change should be isolated.
+Design patterns: Builder (97), Iterator (257), Strategy (315), Template
+Method (325), Visitor (331).
+6. Tight coupling. Classes that are tightly coupled are hard to reuse in isolation, since
+they depend on each other. Tight coupling leads to monolithic systems, where
+you can't change or remove a class without understanding and changing many
+other classes. The system becomes a dense mass that's hard to learn, port, and
+maintain.
+Loose coupling increases the probability that a class can be reused by itself and
+that a system can be learned, ported, modified, and extended more easily. Design
+patterns use techniques such as abstract coupling and layering to promote loosely
+coupled systems.
+Design patterns: Abstract Factory (87), Bridge (151), Chain of Responsibility (223),
+Command (233), Facade (185), Mediator (273), Observer (293).
+7. Extending functionality by subclassing. Customizing an object by subclassing often
+isn't easy. Every new class has a fixed implementation overhead (initialization,
+finalization, etc.). Defining a subclass also requires an in-depth understanding of
+the parent class. For example, overriding one operation might require overriding
+another. An overridden operation might be required to call an inherited operation.
+And subclassing can lead to an explosion of classes, because you might have to
+introduce many new subclasses for even a simple extension.
+Object composition in general and delegation in particular provide flexible alter-
+natives to inheritance for combining behavior. New functionality can be added to
+an application by composing existing objects in new ways rather than by defining
+new subclasses of existing classes. On the other hand, heavy use of object com-
+position can make designs harder to understand. Many design patterns produce
+designs in which you can introduce customized functionality just by defining one
+subclass and composing its instances with existing ones.
+Design patterns: Bridge (151), Chain of Responsibility (223), Composite (163),
+Decorator (175), Observer (293), Strategy (315).
+8. Inability to alter classes conveniently. Sometimes you have to modify a class that
+can't be modified conveniently. Perhaps you need the source code and don't have
+it (as may be the case with a commercial class library). Or maybe any change
+would require modifying lots of existing subclasses. Design patterns offer ways
+to modify classes in such circumstances.
+Design patterns: Adapter (139), Decorator (175), Visitor (331).
+
+## The Catalog of Design Patterns
+The catalog beginning on page 79 contains 23 design patterns. Their names and intents
+are listed next to give you an overview. The number in parentheses after each pattern
+name gives the page number for the pattern (a convention we follow throughout the
+book).
+Abstract Factory (87) Provide an interface for creating families of related or dependent
+objects without specifying their concrete classes.
+Adapter (139) Convert the interface of a class into another interface clients expect.
+Adapter lets classes work together that couldn't otherwise because of incompat-
+ible interfaces.
+Bridge (151) Decouple an abstraction from its implementation so that the two can vary
+independently.
+Builder (97) Separate the construction of a complex object from its representation so
+that the same construction process can create different representations.
+Chain of Responsibility (223) Avoid coupling the sender of a request to its receiver by
+giving more than one object a chance to handle the request. Chain the receiving
+objects and pass the request along the chain until an object handles it.
+Command (233) Encapsulate a request as an object, thereby letting you parameter-
+ize clients with different requests, queue or log requests, and support undoable
+operations.
+Composite (163) Compose objects into tree structures to represent part-whole hierar-
+chies. Composite lets clients treat individual objects and compositions of objects
+uniformly.
+Decorator (175) Attach additional responsibilities to an object dynamically. Decorators
+provide a flexible alternative to subclassing for extending functionality.
+Facade (185) Provide a unified interface to a set of interfaces in a subsystem. Facade
+defines a higher-level interface that makes the subsystem easier to use.
+Factory Method (107) Define an interface for creating an object, but let subclasses de-
+cide which class to instantiate. Factory Method lets a class defer instantiation to
+subclasses.
+www.EBooksWorld.irSECTION 1.5
+ORGANIZING THE CATALOG
+9
+Flyweight (195) Use sharing to support large numbers of fine-grained objects effi-
+ciently.
+Interpreter (243) Given a language, define a represention for its grammar along with
+an interpreter that uses the representation to interpret sentences in the language.
+Iterator (257) Provide a way to access the elements of an aggregate object sequentially
+without exposing its underlying representation.
+Mediator (273) Define an object that encapsulates how a set of objects interact. Me-
+diator promotes loose coupling by keeping objects from referring to each other
+explicitly, and it lets you vary their interaction independently.
+Memento (283) Without violating encapsulation, capture and externalize an object's
+internal state so that the object can be restored to this state later.
+Observer (293) Define a one-to-many dependency between objects so that when one
+object changes state, all its dependents are notified and updated automatically.
+Prototype (117) Specify the kinds of objects to create using a prototypical instance, and
+create new objects by copying this prototype.
+Proxy (207) Provide a surrogate or placeholder for another object to control access to
+it.
+Singleton (127) Ensure a class only has one instance, and provide a global point of
+access to it.
+State (305) Allow an object to alter its behavior when its internal state changes. The
+object will appear to change its class.
+Strategy (315) Define a family of algorithms, encapsulate each one, and make them
+interchangeable. Strategy lets the algorithm vary independently from clients that
+use it.
+Template Method (325) Define the skeleton of an algorithm in an operation, deferring
+some steps to subclasses. Template Method lets subclasses redefine certain steps
+of an algorithm without changing the algorithm's structure.
+Visitor (331) Represent an operation to be performed on the elements of an object
+structure. Visitor lets you define a new operation without changing the classes of
+the elements on which it operates
+
+### 1.7 How to Select a Design Pattern
+With more than 20 design patterns in the catalog to choose from, it might be hard to find
+the one that addresses a particular design problem, especially if the catalog is new and
+unfamiliar to you. Here are several different approaches to finding the design pattern
+that's right for your problem:
+• Consider how design patterns solve design problems. Section 1.6 discusses how design
+patterns help you find appropriate objects, determine object granularity, specify
+object interfaces, and several other ways in which design patterns solve design
+problems. Referring to these discussions can help guide your search for the right
+pattern.
+• Scan Intent sections. Section 1.4 (page 8) lists the Intent sections from all the patterns
+in the catalog. Read through each pattern's intent to find one or more that sound
+relevant to your problem. You can use the classification scheme presented in
+Table 1.1 (page 10) to narrow your search.
+• Study how patterns interrelate. Figure 1.1 (page 12) shows relationships between
+design patterns graphically. Studying these relationships can help direct you to
+the right pattern or group of patterns.
+www.EBooksWorld.irSECTION 1.8
+HOW TO USE A DESIGN PATTERN
+29
+• Study patterns of like purpose. The catalog (page 79) has three chapters, one for
+creational patterns, another for structural patterns, and a third for behavioral
+patterns. Each chapter starts off with introductory comments on the patterns and
+concludes with a section that compares and contrasts them. These sections give
+you insight into the similarities and differences between patterns of like purpose.
+• Examine a cause of redesign. Look at the causes of redesign starting on page 24 to
+see if your problem involves one or more of them. Then look at the patterns that
+help you avoid the causes of redesign.
+• Consider what should be variable in your design. This approach is the opposite of
+focusing on the causes of redesign. Instead of considering what might force a
+change to a design, consider what you want to be able to change without redesign.
+The focus here is on encapsulating the concept that varies, a theme of many design
+patterns. Table 1.2 lists the design aspect(s) that design patterns let you vary
+independently, thereby letting you change them without redesign.
+1.8 How to Use a Design Pattern
+Once you've picked a design pattern, how do you use it? Here's a step-by-step approach
+to applying a design pattern effectively:
+1. Read the pattern once through for an overview. Pay particular attention to the Applic-
+ability and Consequences sections to ensure the pattern is right for your problem.
+2. Go back and study the Structure, Participants, and Collaborations sections. Make sure
+you understand the classes and objects in the pattern and how they relate to one
+another.
+3. Look at the Sample Code section to see a concrete example of the pattern in code. Studying
+the code helps you learn how to implement the pattern.
+4. Choose names for pattern participants that are meaningful in the application context.
+The names for participants in design patterns are usually too abstract to appear
+directly in an application. Nevertheless, it's useful to incorporate the participant
+name into the name that appears in the application. That helps make the pattern
+more explicit in the implementation. For example, if you use the Strategy pattern
+for a text compositing algorithm, then you might have classes SimpleLayoutStrat-
+egy or TeXLayoutStrategy.
+5. Define the classes. Declare their interfaces, establish their inheritance relationships,
+and define the instance variables that represent data and object references. Identify
+existing classes in your application that the pattern will affect, and modify them
+accordingly.
+6. Define application-specific names for operations in the pattern. Here again, the names
+generally depend on the application. Use the responsibilities and collaborations
+associated with each operation as a guide. Also, be consistent in your naming
+conventions. For example, you might use the "Create-" prefix consistently to
+denote a factory method.
+7. Implement the operations to carry out the responsibilities and collaborations in the pattern.
+The Implementation section offers hints to guide you in the implementation. The
+examples in the Sample Code section can help as well.
+
+!@# INTENTS #@!
+ABSTRACT FACTORY
+  Provide an interface for creating families of related or dependent objects without
+  specifying their concrete classes.
+BUILDER
+  Separate the construction of a complex object from its representation so that the
+  same construction process can create different representations.
+FACTORY METHOD
+  Define an interface for creating an object, but let subclasses decide which class to
+  instantiate. Factory Method lets a class defer instantiation to subclasses.
+PROTOTYPE
+  Specify the kinds of objects to create using a prototypical instance, and create new
+  objects by copying this prototype.
+SINGLETON
+  Ensure a class only has one instance, and provide a global point of access to it.

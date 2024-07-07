@@ -1,0 +1,45 @@
+Distributed systems refer to the design and organization of software components that are distributed across multiple devices or locations, connected via a network, and work together to achieve a common goal. 
+The client-server architecture is a common architecture pattern used in distributed systems, where a client (or multiple clients) send requests to a server, and the server responds to those requests.
+The client is responsible for presenting the user interface and handling user input, while the server is responsible for processing the requests and returning the appropriate response. The server can also handle tasks such as data storage, security, and business logic.
+
+Peer-to-peer (P2P) architecture is a distributed computing architecture in which each node (peer) in the network acts as both a client and a server. In P2P architecture, there is no central authority or server that manages the network, and each node communicates directly with other nodes to exchange information, share resources, and perform computations
+
+# Component Principles
+    High cohesion: the degree to which the responsibilities of a component are related to each othe
+    Low coupling: which one component depends on another component
+    Separation of concerns
+    Interface-based design
+    Reusability
+    Testability
+    Modularity
+    Interoperability
+
+the distinction between policy and detail refers to the separation of high-level decisions and low-level implementation details.
+
+ boundaries refer to the interfaces or the points of separation between different components or systems
+
+# architecture pattern
+1. SOA (Service-Oriented Architecture) : is an architectural pattern that is used to design and organize software systems as a collection of services that can be accessed over a network, these services are autonomous, self-contained units of functionality that can be reused and combined to create new functionality. 
+2. CQRS(Command Query Responsibility Segregation)
+3. Domain-Driven Design (DDD) is an architectural pattern that is used to design software systems based on the core business domain and business entities
+4. Model-View-Controller (MVC) is an architectural pattern that separates the concerns of a software system into three distinct components: the model, the view, and the controller
+5. Microservices is an architectural pattern that is used to design software systems as a collection of small, independent, and loosely-coupled services. 
+6. The Blackboard architectural pattern is a software design pattern that allows for the creation of a centralized repository of information that can be accessed and modified by multiple independent modules or subsystems
+7. Serverless architecture is a design pattern that allows developers to build and run applications and services without having to provision and manage servers. 
+8. Message queues and streams are architectural patterns that are used to decouple different components of a system and enable asynchronous communication between them.
+9. Event sourcing is an architectural pattern that is used to build systems that need to maintain a history of all the changes that have occurred over time. 
+10. Monolithic architecture: highly coupled and deployed as one unit.
+
+service mesh: enhancing communication, security, and management between microservices in a distributed network. like istio
+
+The Twelve-Factor App is a methodology for building scalable and maintainable software-as-a-service (SaaS) applications. based on a set of best practices
+
+DTO(Data Transfer Object): use of objects that aggregate and encapsulate data for transfer, It should not contain any business logic but should contain serialization and deserialization mechanisms.
+Use Cases: represent the functional requirements of a system
+Repositories: provide a consistent and abstracted way to access data storage
+Mappers: provide a consistent and abstracted way to map between different data models.
+Transaction Script: organizes business logic into a single procedural script
+Value Objects: represent simple, immutable values that are used to model domain concepts.
+Domain Models: represent the business concepts and rules of a specific domain
+Entities: represent the business concepts that have a unique identity and a lifetime
+ORM stands for Object-Relational Mapping: map between the object-oriented programming model and the relational database model

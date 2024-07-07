@@ -1,0 +1,76 @@
+1. Clear Understanding of Requirements
+    High level view
+    Map your functional Requirements(view, edit, profile)
+    Consider non-functional Requirements
+2. Start thinking about each component
+3. Divide architecture into slices
+4. Prototype
+5. Identify and quantify non-functional Requirements
+    Performance, Scalability, Portability, Extensibility, Compliance
+
+Best Practices
+1. Visualize your design
+2. Don't choose pattern
+3. Be cautious of scope creep
+4. Keep interfaces in mind
+
+High Cohesion(degree which components functionally related)
+Loose Coupling(degree which components depend on another)
+
+## Design Principles
+Composition over inheritance
+Encapsulate what varies
+Programming against abstractions
+The Hollywood Principle is a software development principle that states: “Don’t call us, we’ll call you.” It suggests that high-level components should dictate the flow of control in an application, rather than low-level components.
+Tolerance for Imperfection: accepting that some imperfections are inevitable, Everything is a tradeoff
+
+Explicit dependencies: Methods and classes should explicitly require any collaborating objects they need in order to function correctly
+Bounded Context: DDD deals with large models by dividing them into different Bounded Contexts and being explicit about their interrelationships.
+Separation of concerns (SOC)
+Inversion of Control (IoC) is a design principle in which a software component is designed to receive its dependencies from an external source, rather than creating them itself.
+
+Dependency injection (DI) is a design pattern that allows a programmer to remove hard-coded dependencies and make it possible to change them, whether at run-time or compile-time. It is a technique that allows an object to supply its dependencies, instead of having them hard-coded or created within the object itself. This means that an object does not create its dependencies, but they are passed to it. This allows for more flexibility and a cleaner separation of concerns.
+
+Principle of Architectural Agility: designing software architectures that can adapt to changing requirements and conditions
+
+Boy Scout Rule: Leave your code better than you found it.
+Keep It Simple
+Principle of Least Surprise: minimizes confusion and unexpected behavior for users and developers
+Persistence Ignorance: modeling the business domain in a software application should not be impacted by how they might be persisted
+Tell, Don't Ask:  better to issue an object a command do perform some operation or logic, rather than to query its state and then take some action as a result
+
+#SOLID
+Single Responsibility principle : Each component should have only one reason to change.
+Open close principle : entities should open for extension but closed for modification
+Liskov substitution principle : subclasses should be substitutable for their base class
+Interface segregation principle : Make fine grained interfaces that are client-specific-Clients should not be forced to implement methods they do not use
+Dependency inversion principle : High level modules should not depend on low-level modules. Both should depend on abstraction(interfaces).
+
+DRY (Don’t Repeat Yourself) is a software development principle that suggests that code should not have duplicate functionality
+YAGNI (You Ain’t Gonna Need It) is a software development principle that suggests that developers should not add functionality to a codebase unless it is immediately necessary.
+
+Domain-driven design (DDD) 
+    is a software design approach focusing on modeling software to match a domain according to input from that domain’s experts.
+. Placing the project’s primary focus on the core domain and domain logic;
+. Basing complex designs on a model of the domain;
+. Initiating a creative collaboration between technical and domain experts to iteratively refine a conceptual model that addresses particular domain problems.
+
+Test driven development (TDD) is the process of writing tests for software’s requirements which will fail until the software is developed to meet those requirements.
+
+CQRS stands for Command and Query Responsibility Segregation, 
+CQRS separates reads and writes opertations into different models, using commands to update data, and queries to read data.
+Commands should be task-based, rather than data centric
+Queries never modify the database. A query returns a DTO that does not encapsulate any domain knowledge.
+Separation of the read and write stores also allows each to be scaled appropriately to match the load.
+Some implementations of CQRS use the Event Sourcing pattern &  Event-driven architecture style
+Benefits of CQRS include: Independent scaling, Optimized data schemas, Security, Separation of concerns, Simpler queries
+Some challenges of implementing this pattern include: Complexity, Messaging(use messaging to process commands and publish update events), Eventual consistency
+
+Event Sourcing
+Instead of storing just the current state of the data in a domain, use an append-only store to record the full series of actions taken on that data.
+
+An event-driven architecture consists of event producers that generate a stream of events, and event consumers that listen for the events.
+Producers are decoupled from consumers
+An event driven architecture can use a publish/subscribe (also called pub/sub) model or an event stream model.
+Pub/sub: The messaging infrastructure keeps track of subscriptions. When an event is published, it sends the event to each subscriber
+Event streaming: Events are written to a log. Events are strictly ordered (within a partition) and durable. Clients don't subscribe to the stream, instead a client can read from any part of the stream.
