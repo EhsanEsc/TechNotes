@@ -1,0 +1,30 @@
+Using object-oriented features of PostgreSQL, programmers can:
+
+    Communicate with the database servers using objects in their code.
+    Define complex custom data types.
+    Define functions that work with their own data types.
+    Define inheritance, or parent-child relationships, between tables.
+
+Thus, PostgreSQL design is more flexible than other relational database servers. 
+You can model different relationships and types within the existing database system instead of externally in 
+your application code. You can maintain consistency and improve database performance by enforcing intended behavior closer to the actual data.
+
+PostgreSQL supports a large part of the SQL standard and offers many modern features including the following −
+
+    Complex SQL queries
+    SQL Sub-selects
+    Foreign keys
+    Trigger
+    Views
+    Transactions
+    Multiversion concurrency control (MVCC)
+    Streaming Replication (as of 9.0)
+    Hot Standby (as of 9.0)
+
+You can check official documentation of PostgreSQL to understand the above-mentioned features. PostgreSQL can be extended by the user in many ways. For example by adding new −
+
+    Data types
+    Functions
+    Operators
+    Aggregate functions
+    Index methods

@@ -1,0 +1,41 @@
+# django commands
+Init Project -> django-admin startproject mysite
+running server -> python3 manage.py runserver
+Init App -> python3 manage.py startapp polls
+Creating and updating models and dbs -> python3 manage.py migrate
+Other migrate commands -> 
+    python3 manage.py sqlmigrate polls 0001
+    python3 manage.py makemigrations polls
+Create Admin user -> python3 manage.py createsuperuser
+
+three-step guide to making model changes:
+    Change your models (in models.py).
+    Run python manage.py makemigrations to create migrations for those changes
+    Run python manage.py migrate to apply those changes to the database.
+
+A view is a “type” of Web page in your Django application that generally serves a 
+    specific function and has a specific template
+
+To get from a URL to a view, Django uses what are known as ‘URLconfs’. A URLconf maps URL patterns to views
+
+When somebody requests a page from your website – say, “/polls/34/”, 
+Django will load the mysite.urls Python module because it’s pointed to 
+by the ROOT_URLCONF setting. It finds the variable named urlpatterns and 
+traverses the patterns in order. After finding the match at 'polls/', 
+it strips off the matching text ("polls/") and sends the remaining text – "34/" – 
+to the ‘polls.urls’ URLconf for further processing. 
+There it matches '<int:question_id>/', resulting in a call to the detail() view like so:
+
+Each view is responsible for doing one of two things: 
+returning an HttpResponse object containing the content for the requested page,
+ or raising an exception such as Http404. The rest is up to you.
+
+ Because that would couple the model layer to the view layer. 
+ One of the foremost design goals of Django is to maintain loose coupling. 
+ Some controlled coupling is introduced in the django.shortcuts module.
+
+ Since we’re creating a POST form (which can have the effect of modifying data), 
+ we need to worry about Cross Site Request Forgeries. 
+ Thankfully, you don’t have to worry too hard, because Django comes with a very easy-to-use system 
+ for protecting against it. In short, all POST forms that are targeted at internal URLs 
+ should use the {% csrf_token %} template tag.

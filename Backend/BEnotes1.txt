@@ -1,0 +1,15 @@
+Domain Name: A human-readable name that is used to identify a website, such as google.com.
+DNS: The Domain Name System is responsible for translating domain names into IP addresses.
+HTTP: The Hypertext Transfer Protocol is used to transfer data between a client (such as a web browser) and a server (such as a website).
+SSL/TLS: The Secure Sockets Layer and Transport Layer Security protocols are used to provide secure communication over the internet.
+Sockets: A socket is a combination of an IP address and a port number, representing a specific endpoint for communication. Sockets are used to establish connections between devices and transfer data between applications.
+
+When using SSL/TLS to secure internet communication, there are a few key concepts to understand:
+    Certificates: SSL/TLS certificates are used to establish trust between the client and server. They contain information about the identity of the server and are signed by a trusted third party (a Certificate Authority) to verify their authenticity.
+    Handshake: During the SSL/TLS handshake process, the client and server exchange information to negotiate the encryption algorithm and other parameters for the secure connection.
+    Encryption: Once the secure connection is established, data is encrypted using the agreed-upon algorithm and can be transmitted securely between the client and server.
+
+When to Use Relational Databases
+ Structured Data Requirements, Complex Queries and Join Operations, ACID Transactions, Mature Tools and Ecosystem
+When to Use Non-Relational Databases
+ Flexible Data Models, Scalability, High Performance with Simple Queries, Rapid Development

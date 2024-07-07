@@ -1,0 +1,3 @@
+Standardizes process of running any service on any local machines
+Easy to run different versions
+Deployment with docker: app source code, configurations, dependencies

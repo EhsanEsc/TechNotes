@@ -1,0 +1,162 @@
+compile & run go file with -> go run [file_names...]
+compile go file -> go build [file_names... ]
+
+packages are some source code related to each other. all of files with same package should has
+    "package PACKAGE_NAME" at start of its code.
+two types of packages : Executable and Reusable. using "main" as package name declare that package is executable.
+
+use "import PACKAGE_NAME" to include other package to our code. see "golang.org/pkg" to see all standard packages.
+
+function declaration
+func function_name([args_list]) [return_static_type] | (return_types, ...){
+    function_body
+}
+args_list -> IT IS SWAPPED! 
+    var_name var_type
+example ->
+    func f(a int, b int) (int, int) {
+        ...
+    }
+    a, b := f(1, 2)
+
+variable declaration
+var VAR_NAME [static_type] = value 
+VAR_NAME := value
+
+array, slice(vector in c++)
+elements must be the same type.
+slice type -> []TYPE
+slice value -> [] TYPE{value1, value2, ...}
+push_back -> container = append(container, value)
+*important note: append return new data and not motify container!
+iteration -> 
+    for index, current_value := range container_name {
+        ...
+    }
+    use _ for don't care
+range select -> works like python
+    slice_name[[start index inclusive] : [end index exclusive]]
+
+custom type declaration
+go is not oo language! we define new behavior and functionality for new type.
+in hard way, TYPE_NAME extends TYPE behavior and stuff.
+declare new type
+    type TYPE_NAME TYPE
+add new function to type(receiver function)
+    func (var_name VAR_TYPE) FUNCTION_NAME() {
+        ...
+    }
+
+files
+use ioutil package for write and read with files
+    func WriteFile(filename string, data []byte, perm os.FileMode) error
+    func ReadFile(filename string) ([]byte, error)
+we should convert anything to byte slice to save it.
+we should cast like this: deck -> []string -> string -> []byte
+use strings.Join to concat all strings to one
+use strings.Split(s string, sep string) []string to split string
+use os.Exit(code int) to quit program and handling error
+use rand.Intn(n int) int to get a random number in [0:n)
+using seed with ->
+    source := rand.NewSource(time.Now().UnixNano())
+    r := rand.New(source)
+    i := r.Intn(len(s) - 1)
+
+casting
+    NEW_TYPE(old_value)
+example
+    []byte("hi")
+
+testing
+create_test_file -> *_test.go
+run_all_tests -> go test
+create_test_case ->
+    func Test*(t *testing.T) {
+        t.Errorf("asdf")
+    }
+
+declaring structs
+    type TYPE_NAME struct {
+        fieldname1 type1
+        fieldname2 [type2]
+        ...
+    }
+initilizing -> 
+    p := person{"Ehsan", "Escandari"}
+    p := person{field1: "Ehsan", field2: "Esc"}
+accessing fields -> 
+    fmt.Println(person.field1)
+
+* important note : be careful about passing with value(even with receiver)
+u can use pointer which is easier than c++ and can be used for pass by refrence.
+it even has default shortcut from obj to *obj in receiver type
+    pointer := &obj
+    (*pointer).field = new_value
+    obj.method() // equavalent with pointer.method()
+    // func (pointer *person) method (...)
+some types use pass by refrence not by value
+RefrenceTypes : slices, maps, channels, pointers, functions
+ValueTypes : int, float, string, bool, structs
+
+map
+    colors := map[string]string {
+        "red" : "0",
+        "blue" : "1",
+    }
+    colors2 := make(map[string]string)
+    colors["white"] = "2"
+    delete(colors, "white")
+    for color, number := range c {
+        ...
+    }
+
+go does not have overloadin(two funciton with same name and diffrent args types)
+we can use interface to have same logic for diffrent types
+we declare a new type with interface and specify functions which works with interface
+    type INTERFACE_NAME interface {
+        FUNCTION_NAME(LIST_OF_ARGS_TYPES) LIST_OF_RETURN_TYPE
+    }
+    func ANOTHER_FUNC(b INTERFACE_NAME) {
+        ... use functions declared in interface with b
+    }
+    // usage : we can pass directly other objects which has FUNCTION_NAME 
+interface are not generic types
+interface are implicit
+interfaces are contract to help us to manage types.
+interfaces are tough
+interfaces can be consist of other interfaces
+* field of struct can be type of an interface!
+    this field can be filled by any value of any type which satisfy its interface
+
+concurrency
+channels & go routine
+use "go" before function call to create new go routine 
+    which runs function until it blocks or finished. only 1 routine runs at time
+    we can config scheduler to runs each routine for each cpu core.
+concurrency : multiple threads executing, if one blocks, anohter one is picked up
+parallelism : multiple threads executed at the exact time, requires multiple cpu
+channels used for comminucation between go routines. only with 1 type
+declaration
+    c := make(chan string)
+    c <- "asdf" // send value into this channel
+    my_c <- channel // wait for a value from channel
+
+function literal
+lambda in c++!
+    go func(args) {
+        ...
+    }(values for calling func)
+it copies by refrence. u should add args to copies by value
+
+we can switch over type of something
+var boolRef interface {}
+bl := true
+boolRef = &boolean
+switch t := boolRef.(type) {
+    case bool:
+        ...
+    case *int:
+        ...
+}
+
+we can run functions later when nearby function finished with "defer" keyword

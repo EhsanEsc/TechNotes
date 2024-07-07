@@ -1,0 +1,78 @@
+# stash
+Git stash enables you to save your code without making a commit.
+
+git stash
+git list
+git stash pop
+git stash apply stash@{1}
+
+# squash commits
+
+git rebase -i HEAD~3  
+- change 2-last commits to squash
+
+# log
+
+git log --oneline -3
+@ The --decorate flag makes git log display all of the references (e.g., branches, tags, etc) that point to each commit.
+git log --oneline --decorate
+@ The --stat option displays the number of insertions and deletions to each file altered by each commit
+@ The "git shortlog" command groups each commit by author and displays the first line of each commit message
+
+@ formatting
+For all of your other git log formatting needs, you can use the --pretty=format:"" option. This lets you display each commit however you want using printf-style placeholders.
+For example, the %cn, %h and %cd characters in the following command are replaced with 
+    the committer name, abbreviated commit hash, and the committer date, respectively.
+particularly useful when you’re trying to pipe git log output into another command.
+
+@ filtering
+by count -3
+by date --after="2014-7-1" --after="yesterday"
+by author --author="John"
+by commit message --grep="JRA-224"
+by file, history related to a file -> git log -- foo.py bar.py
+by range ->  git log main..feature
+by merge commits --no-merges --merges
+# Other
+git clean # deleting untracked files
+
+# checkout
+ 
+git checkout HEAD~2 # Moves two commit back and don't delete anything -> Create new branch before commit new things
+
+# reset
+If you do find yourself in the situation where you’ve accidentally committed some messy code, 
+    you can do a “soft” reset. This means that the code appears as if it has not been committed yet. 
+
+git reset --soft HEAD~1
+
+# reset/revert
+
+git commit --amend # change most recent git commit message
+git commit --amend --no-edit # add change to most recent commit
+
+git revert HEAD # revert last commit and create new commit
+git reset --hard COMMITSHA # reset to specified commit and ignore all commits after that
+git reset --hard HEAD~2 # like above one, ignore last two commits
+
+@ git reset and git checkout can accept optional file path as a parameter
+@ When invoked with a file path, git reset updates the staged snapshot to match the version from the specified commit
+@ Checking out a file is similar to using git reset with a file path, except it updates the working directory instead of the stage. 
+
+git reset HEAD~2 foo.py
+git checkout HEAD~2 foo.py
+
+# develop branch conflict
+1
+git checkout main
+git pull
+git checkout feature
+git merge main
+2
+git checkout feature
+git rebase main
+
+# diff
+@ compare two branches (file path optional)
+git diff master..testb -- main.html
+ 
